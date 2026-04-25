@@ -1,0 +1,31 @@
+id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness,popularity,release_year,release_decade,instrumentalness,liveness,speechiness,detailed_mood_tags
+1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18,88,2024,2020,0.16,0.65,0.10,happy|high_energy|dance|uplifting
+2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71,68,2015,2010,0.60,0.41,0.10,chill|low_energy|acoustic
+3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10,83,2024,2020,0.15,0.77,0.20,intense|high_energy
+4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86,65,2012,2010,0.71,0.37,0.10,chill|low_energy|acoustic
+5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05,92,2024,2020,0.07,0.73,0.20,intense|high_energy|dance|uplifting
+6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92,61,2007,2000,0.74,0.32,0.10,chill|low_energy|acoustic
+7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89,66,2018,2010,0.71,0.42,0.10,relaxed|low_energy|acoustic
+8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22,80,2024,2020,0.24,0.61,0.10,moody
+9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78,67,2016,2010,0.65,0.41,0.10,focused|low_energy|acoustic
+10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35,86,2024,2020,0.29,0.65,0.10,happy|dance|uplifting
+11,Love The Way You Lie,Eminem,hip-hop,intense,0.88,180,0.42,0.71,0.08,83,2024,2020,0.15,0.83,0.50,intense|high_energy|lyrical|moody
+12,Lose Yourself,Eminem,rap,intense,0.92,170,0.35,0.76,0.05,84,2024,2020,0.14,0.82,0.50,intense|high_energy|dance|lyrical|moody
+13,Without Me,Eminem,rap,playful,0.85,165,0.53,0.73,0.06,84,2024,2020,0.12,0.78,0.50,playful|high_energy|lyrical
+14,Stan,Eminem,hip-hop,dark,0.78,124,0.28,0.68,0.12,78,2024,2020,0.20,0.65,0.50,dark|lyrical|moody
+15,The Real Slim Shady,Eminem,rap,playful,0.89,160,0.52,0.75,0.04,86,2024,2020,0.10,0.78,0.50,playful|high_energy|dance|lyrical
+16,Radioactive,Imagine Dragons,electronic rock,intense,0.87,103,0.61,0.74,0.15,85,2024,2020,0.17,0.63,0.20,intense|high_energy
+17,Believer,Imagine Dragons,rock,intense,0.86,120,0.65,0.77,0.08,87,2024,2020,0.11,0.67,0.20,intense|high_energy|dance
+18,Thunder,Imagine Dragons,pop rock,energetic,0.84,105,0.68,0.79,0.10,87,2024,2020,0.12,0.63,0.10,energetic|high_energy|dance
+19,Demons,Imagine Dragons,rock,dark,0.79,95,0.44,0.65,0.18,79,2024,2020,0.22,0.58,0.20,dark|moody
+20,Whatever It Takes,Imagine Dragons,rock,determined,0.82,116,0.63,0.71,0.12,84,2024,2020,0.15,0.65,0.10,determined|high_energy
+21,Bleeding Out,Imagine Dragons,rock,intense,0.88,125,0.42,0.72,0.09,83,2024,2020,0.15,0.69,0.20,intense|high_energy|moody
+22,Blinding Lights,The Weeknd,synthwave,energetic,0.73,103,0.73,0.76,0.17,84,2024,2020,0.17,0.58,0.10,energetic|dance
+23,Levitating,Dua Lipa,pop,happy,0.80,125,0.84,0.87,0.11,90,2024,2020,0.11,0.66,0.10,happy|high_energy|dance|uplifting
+24,Anti-Hero,Taylor Swift,pop,reflective,0.62,98,0.38,0.65,0.24,74,2024,2020,0.27,0.53,0.10,reflective|moody
+25,Cruel Summer,Taylor Swift,pop,euphoric,0.85,128,0.80,0.81,0.13,89,2024,2020,0.13,0.69,0.10,euphoric|high_energy|dance|uplifting
+26,Uptown Funk,Mark Ronson ft. Bruno Mars,funk pop,happy,0.81,104,0.83,0.88,0.14,90,2024,2020,0.13,0.61,0.10,happy|high_energy|dance|uplifting
+27,Shut Up and Dance,Walk the Moon,new wave,happy,0.79,116,0.76,0.82,0.06,88,2024,2020,0.08,0.64,0.10,happy|dance|uplifting
+28,Mr. Brightside,The Killers,rock,energetic,0.84,120,0.72,0.75,0.12,87,2024,2020,0.13,0.66,0.10,energetic|high_energy|dance
+29,Electric Feel,MGMT,electronic,groovy,0.72,118,0.68,0.74,0.21,83,2024,2020,0.21,0.62,0.10,groovy
+30,Somebody Else,The 1975,indie pop,melancholic,0.68,112,0.45,0.72,0.28,77,2024,2020,0.29,0.59,0.10,melancholic|moody
