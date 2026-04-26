@@ -1,258 +1,197 @@
-# 🎵 Music Recommender Simulation
+# Enhanced Agentic Music Recommender
 
-## Project Summary
+## Original Project
 
-This project builds a small rule-based music recommender.  
-It compares song features with a user taste profile and ranks songs by match score.  
-The system then returns the top 5 recommendations and a short explanation for each score.  
-The goal is to study how recommendation logic works in a controlled classroom setting.  
+**Base:** Music Recommender Simulation (Modules 1–3).
 
----
-
-## How Real-World Recommenders Work
-
-Real apps like Spotify and YouTube combine many data signals.  
-They use content features (genre, mood, tempo), user behavior (plays, skips, likes), and listening history (recent and long-term).  
-
-This project mirrors that structure in a simplified form:
-
-- Input data: song attributes from the dataset.
-- User preferences: a profile with favorite genre, mood, and target audio values.
-- Ranking and selection: a scoring function ranks songs, and the top results are returned.
-
-This is a rule-based simulation, not a trained machine learning model.
+The original project matched songs to user profiles using a fixed scoring formula. It compared features like genre, energy, and mood, then returned the top 5 results from a 30-song CSV. No AI, no self-correction, no external calls.
 
 ---
 
-## How The System Works
+## What This Project Does
 
-The recommender uses a `Song` object with these features:
+**VibeMaxer** upgrades the original into a multi-agent AI pipeline. Instead of one static formula, a team of agents works together to plan a strategy, rank songs, check the quality, and add streaming links — all automatically.
 
-- Categorical features: genre and mood
-- Numeric features: energy, valence, danceability, acousticness, and tempo (BPM)
-- Added attributes: popularity (0-100), release year, release decade, instrumentalness, liveness, speechiness, and detailed mood tags
-- Metadata: id, title, and artist
+What's new:
+- AI-powered Planner and Quality Checker agents (using Gemini)
+- Auto-retry when results are bad (filter bubble detection)
+- Streamlit web UI with custom profile builder
+- Gemini generates new songs to grow the library
+- Spotify API integration for real song data
+- CLI with full error handling and guardrails
 
-The `UserProfile` stores a target taste, such as favorite genre, favorite mood, target energy, target valence, target danceability, and tempo preference.
-
-For each song, the recommender computes a weighted similarity score.  
-Exact matches on genre and mood add strong positive weight.  
-Numeric features add partial points based on closeness to the user targets.  
-The score also uses popularity, era fit, instrumentalness, liveness, speechiness, and mood-tag overlap.  
-After base scoring, a diversity reranker applies an artist repetition penalty to reduce filter bubbles.  
-The system then returns the top 5 results.
-
-### Ranking Modes
-
-The app supports multiple modular ranking strategies:
-
-- `balanced` (default)
-- `genre_first`
-- `mood_first`
-- `energy_similarity`
-
-You can switch modes in `src/main.py` using `active_ranking_mode`.
-
-### How To Change Mode and Profile
-
-Open `src/main.py` and update these two variables inside `main()`:
-
-- `active_profile_name` controls which user taste profile is used.
-- `active_ranking_mode` controls which ranking strategy is used.
-
-Example:
-
-```python
-active_profile_name = "maya_lofi_chill"
-active_ranking_mode = "mood_first"
-```
-
-Available profile keys:
-
-- `alex_pop_happy`
-- `maya_lofi_chill`
-- `ryan_rap_intense`
-
-Available ranking modes:
-
-- `balanced`
-- `genre_first`
-- `mood_first`
-- `energy_similarity`
-- 
-![](images/image.png)
-
-After changing values, run:
-
-```bash
-uv run python src/main.py
-```
-
-## Output Showing Recommendations
-
-### Single Profile:
-![Output Showing recommondations](images/recommendations.png)
-
-### Multiple Profile:
-![](images/users.png)
-
-The multi-profile screenshot includes `alex_pop_happy`, `maya_lofi_chill`, and `ryan_rap_intense`.
-
-The terminal now renders a formatted ASCII table with rank, title, artist, final score, and reason text for transparency.
-
-### Top-3 Explanation Examples
-
-Examples from a run for `alex_pop_happy`:
-
-- Sunrise City: `genre match + mood match + high energy closeness + tempo fit`
-- Levitating: `genre match + mood match + strong danceability + valence match`
-- Cruel Summer: `genre match + energy closeness + valence match`
-
-These explanations come directly from the scoring components.
+**Why it matters:** The system can detect bad results and fix them on its own — something the original could not do.
 
 ---
 
-## Getting Started
+## walkthrough
 
-### Setup
+![](assets/walkthrough.gif)
 
-1. Install dependencies
+---
+## How It Works
 
+![alt text](assets/image.png)
+
+The **Quality Check Agent** is the key upgrade over the original project. It measures artist diversity (`diversity_ratio`) and average score. If too many songs are from the same artist, it fails the check and sends the Ranking Agent back with better settings — automatically, with no human input needed.
+
+---
+
+## Setup
+
+**1. Install dependencies**
 ```bash
 uv sync
 ```
 
-2. Run the app:
+**2. Add API keys to `.env`**
+```
+GEMINI_API_KEY="your-key-here"
+SPOTIFY_CLIENT_ID="optional"
+SPOTIFY_CLIENT_SECRET="optional"
+```
+Free Gemini key: [aistudio.google.com](https://aistudio.google.com)
 
+**3. Run the web UI**
 ```bash
-uv run python src/main.py
+uv run streamlit run src/app.py
 ```
+Open http://localhost:8501
 
-### Agentic Workflow CLI
-
-The CLI now runs an agentic pipeline with three stages:
-
-- `ProfileAgent`: validates and loads a user profile
-- `PlannerAgent`: selects ranking strategy and tuning settings (local logic or Gemini)
-- `RankingAgent`: scores and ranks songs using the configured ranking mode
-- `QualityCheckAgent`: checks recommendation quality and can trigger one retry
-- `LinkRoutingAgent`: generates links for each recommendation across music platforms
-
-### Real LLM Agent (Gemini)
-
-This project supports a real model-backed agent using Gemini via API.
-
-Set your API key:
-
+**4. Or use the CLI**
 ```bash
-# PowerShell
-$env:GEMINI_API_KEY="your_api_key_here"
+uv run python src/main.py --profile alex_pop_happy --mode auto --use-gemini --gemini-model gemini-3-flash-preview --show-agent-log
 ```
 
-Run with Gemini planner/checker enabled:
-
+**5. Add more songs (no Spotify needed)**
+Use the "Fetch Songs via AI" button in the sidebar, or:
 ```bash
-uv run python main.py --mode auto --use-gemini --show-agent-log
+uv run python src/fetch_songs.py --genres pop jazz rock --limit 30
 ```
 
-What changes when Gemini is enabled:
-
-- Planner agent proposes `selected_mode`, `selected_top_k`, and `selected_artist_penalty`
-- Checker agent evaluates quality and confidence
-- If quality is low, workflow retries once with checker-suggested settings
-- Agent diagnostics are printed with `--show-agent-log`
-
-If no API key is present, the app safely falls back to deterministic local planning/checking.
-
-Example run with custom profile, mode, and platforms:
-
-```bash
-uv run python main.py --profile maya_lofi_chill --mode mood_first --top-k 5 --platforms spotify,youtube_music,apple_music,deezer,soundcloud
-```
-
-Open a recommendation directly in browser (interactive prompt):
-
-```bash
-uv run python main.py --open-browser
-```
-
-### System Diagram
-
-```mermaid
-flowchart TD
-	A[User CLI Input] --> B[ProfileAgent]
-	B --> C[PlannerAgent\nLocal or Gemini]
-	C --> D[RankingAgent]
-	D --> E[QualityCheckAgent\nLocal or Gemini]
-	E -->|quality low| D
-	E -->|quality pass| F[LinkRoutingAgent]
-	F --> G[Recommendations + Platform URLs]
-	H[Human review / tests] --> G
-```
-
-Supported platform keys:
-
-- `spotify`
-- `youtube_music`
-- `apple_music`
-- `deezer`
-- `soundcloud`
-
-### Running Tests
-
-Run the starter tests with:
-
+**6. Run tests**
 ```bash
 uv run pytest
 ```
 
-You can add more tests in `tests/test_recommender.py`.
+---
+
+## Sample Interactions
+
+### 1. Gemini picks the right strategy automatically
+
+```bash
+uv run python src/main.py --profile maya_lofi_chill --mode auto --use-gemini --gemini-model gemini-3-flash-preview --show-agent-log
+```
+
+```
+Used Gemini: True
+Planner: mode=mood_first, top_k=5, penalty=0.06
+         reason: "Mood is the strongest signal for lofi profiles."
+Checker: quality_pass=True, confidence=0.88
+Retries: 0
+
+# 1  Midnight Coding    LoRoom          0.834
+# 2  Library Rain       Paper Lanterns  0.812
+# 3  Focus Flow         LoRoom          0.774
+```
+
+**What this shows:** The AI chose `mood_first` on its own. It was not told which mode to use — it figured it out from the profile.
 
 ---
 
-## Experiments You Tried
+### 2. Filter bubble detected, retry triggered
 
-I tested several scoring adjustments to observe behavior changes.
+```bash
+uv run python src/main.py --profile ryan_rap_intense --artist-penalty 0.0 --show-agent-log
+```
 
-- Lowered genre weight from 2.0 to 0.5:
-Cross-genre songs appeared more often. This increased diversity, but reduced alignment with user intent.
+```
+Checker: quality_pass=False, confidence=0.35
+         reason: "diversity_ratio=0.33 — 3 of 5 songs from same artist"
+         retry_mode=balanced, retry_artist_penalty=0.2
+Retries: 1
 
-- Added tempo and valence in scoring:
-Tempo improved precision for users with clear BPM preferences. Valence helped better match emotional tone.
+# 1  Lose Yourself     Eminem          0.921
+# 2  DNA.              Kendrick Lamar  0.887
+# 3  SICKO MODE        Travis Scott    0.856
+```
 
-- Compared multiple user profiles:
-`alex_pop_happy` received strong mainstream matches. `maya_lofi_chill` and `ryan_rap_intense` had good top results but less variety due to catalog limits.
+**What this shows:** Setting penalty to 0 caused repeated artists. The Quality Checker caught it and fixed it automatically.
 
-Comment on output differences:
-
-- The pop profile favored high-valence, danceable songs.
-- The lofi profile shifted toward lower energy and higher acousticness.
-- The rap profile favored high-energy, high-tempo, intense tracks.
-  
 ---
 
-## Limitations and Risks
+### 3. API fails — app still works
 
-This recommender has important limitations:
+```
+WARNING | Gemini server error (503). Retrying in 5 seconds...
+WARNING | Gemini call failed. Falling back to local logic.
 
-- The catalog is very small (30 songs), so coverage is limited.
-- The model does not use lyrics, language, release era, or listening history.
-- Strong genre and mood matching can create filter bubbles.
-- Popular genres receive more variety than niche genres.
+Used Gemini: True
+Planner: mode=mood_first, reason="local planner fallback"
+Checker: quality_pass=True, confidence=0.92
 
-These issues can reduce fairness and discovery for some users. A full analysis is included in the model card.
-  
+# 1  Sunrise City      Neon Echo       1.250
+# 2  Levitating        Dua Lipa        1.221
+# 3  Cruel Summer      Taylor Swift    0.889
+
+[Spotify] https://open.spotify.com/search/Sunrise+City+Neon+Echo
+[YouTube] https://music.youtube.com/search?q=Sunrise+City+Neon+Echo
+```
+
+**What this shows:** Even when Gemini was down, the app finished without crashing and still gave good results.
+
+---
+
+## Design Decisions
+
+| Decision | Why |
+|---|---|
+| Agents are separate classes | Easy to upgrade or test one without breaking others |
+| Always fall back to local logic | App never crashes due to API issues |
+| 120-second API timeout | Gemini 3 models are slower — found this through real testing |
+| AI picks strategy, not songs | Keeps scoring fair and predictable |
+| Gemini generates new songs | Grows the library without needing Spotify |
+| Custom profile injected at runtime | No code changes needed to support user-built profiles |
+
+---
+
+## Testing
+
+**6/6 automated tests passed. Confidence averaged 0.88–0.92. Fallback worked 100% of the time.**
+
+**Automated tests**
+```bash
+uv run pytest   # 6 passed
+```
+Covers: scoring logic, agent report structure, URL generation, input validation.
+
+**Confidence scoring**
+Every run shows a confidence score (0–1):
+```
+Checker: quality_pass=True, confidence=0.92, reason="diversity_ratio=1.000, avg_score=1.044"
+```
+This tells you how good the results are, not just that the app ran.
+
+**Retry test**
+Force `--artist-penalty 0.0` → checker detects `diversity_ratio=0.33` → fails → retries → diversity fixed.
+
+**API failure test**
+Block internet mid-run → 503 logged → retried → fallback triggered → results still printed, no crash.
+
+**What didn't work**
+- Wrong model names caused HTTP 404 (e.g. `gemini-2.0-flash-lite` needs `-001`, `gemini-3.1-flash-lite` needs `-preview`). Had to check the live API to find the right names.
+- 20-second timeout was too short for Gemini 3 models. Raised to 120 seconds after real-world testing.
+- With only 30 songs, niche genres give weak results. The AI song fetcher fixes this.
+
 ---
 
 ## Reflection
 
-Building this project showed me how recommenders turn user preferences into numeric decisions. Even a simple weighted formula can produce results that feel accurate at first. I also learned that each feature weight acts like a product decision. A stronger weight can improve precision for one user while reducing variety for another.
+**Reliability beats capability.** A smart model that crashes is worse than a simple one that always works. Building the fallback system took more effort than the Gemini integration — and was worth it.
 
-I also saw how bias can appear without harmful intent. When a catalog is uneven, users in underrepresented genres get fewer and more repetitive suggestions. The system appears neutral, but it still favors users whose tastes match the largest part of the dataset. This made it clear that fairness, diversity, and transparency are essential parts of recommender design.
+**Data matters more than strategy.** The AI can pick the perfect ranking mode, but if there are only 3 jazz songs, jazz profiles will always get weak results. That's why growing the library is a core feature now.
 
-Read and complete `model_card.md`:
+**Let AI plan, not score.** Letting Gemini pick which strategy to use worked great. Letting it score individual songs directly would be unpredictable. Clear boundaries between what the AI controls and what the code controls made the system easier to trust and debug.
 
-[**Model Card**](model_card.md)
-
----
-
+**On AI collaboration:** AI was most helpful for structured tasks — diagrams, retry logic, song generation. It was least reliable for facts that change over time, like model names. Everything it suggested about API endpoints needed manual verification.

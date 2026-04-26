@@ -14,6 +14,12 @@ from urllib.parse import quote_plus
 import webbrowser
 
 try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv not installed; rely on actual env vars
+
+try:
     from .recommender import load_songs, recommend_songs
 except ImportError:
     from recommender import load_songs, recommend_songs
@@ -116,7 +122,7 @@ class WorkflowReport:
 class GeminiClient:
     """Minimal Gemini REST client that requests JSON-only responses."""
 
-    def __init__(self, api_key: str | None, model: str = "gemini-2.0-flash") -> None:
+    def __init__(self, api_key: str | None, model: str = "gemini-2.0-flash-lite-001") -> None:
         self.api_key = api_key
         self.model = model
 
@@ -124,7 +130,7 @@ class GeminiClient:
     def enabled(self) -> bool:
         return bool(self.api_key)
 
-    def generate_json(self, prompt: str, fallback: Dict, max_retries: int = 4) -> Dict:
+    def generate_json(self, prompt: str, fallback: Dict, max_retries: int = 3) -> Dict:
         """Return JSON content from Gemini or a deterministic fallback."""
         if not self.enabled:
             return fallback
@@ -146,7 +152,7 @@ class GeminiClient:
                     headers={"Content-Type": "application/json"},
                     method="POST",
                 )
-                with urllib_request.urlopen(req, timeout=20) as response:
+                with urllib_request.urlopen(req, timeout=120) as response:
                     body = json.loads(response.read().decode("utf-8"))
                 text = body["candidates"][0]["content"]["parts"][0]["text"]
                 parsed = json.loads(text)
@@ -155,9 +161,9 @@ class GeminiClient:
                 LOGGER.warning("Gemini returned non-dict JSON, using fallback.")
                 return fallback
             except urllib_error.HTTPError as exc:
-                if exc.code == 429 and attempt < max_retries - 1:
+                if exc.code in {429, 500, 502, 503, 504} and attempt < max_retries - 1:
                     sleep_time = 5 * (2 ** attempt)
-                    LOGGER.warning("Gemini rate limited (429). Retrying in %d seconds...", sleep_time)
+                    LOGGER.warning("Gemini server error or rate limit (%d). Retrying in %d seconds...", exc.code, sleep_time)
                     time.sleep(sleep_time)
                     continue
                 LOGGER.warning("Gemini call failed (%s). Falling back to local logic.", exc)
@@ -339,7 +345,7 @@ class QualityCheckAgent:
 class AgenticRecommendationWorkflow:
     """Orchestrates profile, ranking, and link-routing agents."""
 
-    def __init__(self, use_gemini: bool = False, gemini_model: str = "gemini-2.0-flash") -> None:
+    def __init__(self, use_gemini: bool = False, gemini_model: str = "gemini-2.0-flash-lite-001") -> None:
         api_key = os.getenv("GEMINI_API_KEY") if use_gemini else None
         self.gemini = GeminiClient(api_key=api_key, model=gemini_model)
         self.profile_agent = ProfileAgent()
@@ -430,7 +436,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--gemini-model",
-        default="gemini-2.0-flash",
+        default="gemini-2.0-flash-lite-001",
         help="Gemini model name",
     )
     parser.add_argument(
@@ -547,7 +553,9 @@ def main() -> None:
     songs = load_songs("data/songs.csv")
     platforms = parse_platforms(args.platforms)
 
-    workflow = AgenticRecommendationWorkflow(use_gemini=args.use_gemini, gemini_model=args.gemini_model)
+    # Auto-enable Gemini when a key is present, even without --use-gemini
+    use_gemini = args.use_gemini or bool(os.getenv("GEMINI_API_KEY"))
+    workflow = AgenticRecommendationWorkflow(use_gemini=use_gemini, gemini_model=args.gemini_model)
     recommendations = workflow.run(
         songs=songs,
         profile_name=args.profile,
